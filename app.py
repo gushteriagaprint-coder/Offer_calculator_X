@@ -1557,10 +1557,14 @@ class App(tk.Tk):
             for rr,(l1,v1,l2,v2) in enumerate(rows):
                 finance1 = l1 in ('Печалба','Разходи')
                 finance2 = l2 in ('Печалба','Разходи')
-                ttk.Label(grid,text=l1,style='HimiyaPriceBold.TLabel' if finance1 else 'HimiyaPrice.TLabel').grid(row=rr,column=0,sticky='w',padx=6,pady=3)
-                ttk.Label(grid,text=v1,style='HimiyaPriceBold.TLabel' if finance1 else 'HimiyaPrice.TLabel').grid(row=rr,column=1,sticky='w',padx=4,pady=3)
-                ttk.Label(grid,text=l2,style='HimiyaPriceBold.TLabel' if finance2 else 'HimiyaPrice.TLabel').grid(row=rr,column=2,sticky='w',padx=6,pady=3)
-                ttk.Label(grid,text=v2,style='HimiyaPriceBold.TLabel' if finance2 else 'HimiyaPrice.TLabel').grid(row=rr,column=3,sticky='w',padx=4,pady=3)
+                # Всички редове в ценообразуването са болд, с изключение на
+                # „Печалба“ и „Разходи“, които запазват досегашния стил.
+                style1 = 'HimiyaPrice.TLabel' if finance1 else 'HimiyaPriceBold.TLabel'
+                style2 = 'HimiyaPrice.TLabel' if finance2 else 'HimiyaPriceBold.TLabel'
+                ttk.Label(grid,text=l1,style=style1).grid(row=rr,column=0,sticky='w',padx=6,pady=3)
+                ttk.Label(grid,text=v1,style=style1).grid(row=rr,column=1,sticky='w',padx=4,pady=3)
+                ttk.Label(grid,text=l2,style=style2).grid(row=rr,column=2,sticky='w',padx=6,pady=3)
+                ttk.Label(grid,text=v2,style=style2).grid(row=rr,column=3,sticky='w',padx=4,pady=3)
 
             # Диагностика на довършителните операции.
             # За разделителите Excel използва:
@@ -3784,9 +3788,7 @@ class App(tk.Tk):
 
             _, mat = self._request_card(sheet, 'Материали', 1, 1, 1)
             for c in range(2): mat.columnconfigure(c, weight=1)
-            material_rows=[('Хартия',paper_total),('Печат',print_total),
-                           ('Довършителни операции',finish_total),('Предпечат',prepress_total),
-                           ('Други материали',other_total)]
+            material_rows=[('Хартия',paper_total),('Плаки',euro('plates'))]
             material_rows=[(lab,val) for lab,val in material_rows if abs(val) > 1e-12]
             for i,(lab,val) in enumerate(material_rows):
                 self._request_field(mat, lab, f'{val:.2f} €', i, 0, value_bold=(lab=='Хартия'))
