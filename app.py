@@ -3788,10 +3788,10 @@ class App(tk.Tk):
 
             _, mat = self._request_card(sheet, 'Материали', 1, 1, 1)
             for c in range(2): mat.columnconfigure(c, weight=1)
-            material_rows=[('Хартия',paper_total),('Плаки',euro('plates'))]
+            material_rows=[('ХАРТИЯ',paper_total),('ПЛАКИ',euro('plates'))]
             material_rows=[(lab,val) for lab,val in material_rows if abs(val) > 1e-12]
             for i,(lab,val) in enumerate(material_rows):
-                self._request_field(mat, lab, f'{val:.2f} €', i, 0, value_bold=(lab=='Хартия'))
+                self._request_field(mat, lab, f'{val:.2f} €', i, 0, value_bold=(lab=='ХАРТИЯ'))
 
             finish_text=v['finish'] or '—'
 
@@ -3814,9 +3814,9 @@ class App(tk.Tk):
             extra.columnconfigure(0, weight=1)
             extra_rows=[]
             if abs(transport_total) > 1e-12:
-                extra_rows.append(('Транспорт', transport_total))
+                extra_rows.append(('ТРАНСПОРТ', transport_total))
             if abs(surcharge_total) > 1e-12:
-                extra_rows.append(('Оскъпяване на труда', surcharge_total))
+                extra_rows.append(('ОСКЪПЯВАНЕ НА ТРУДА', surcharge_total))
             for i,(lab,val) in enumerate(extra_rows):
                 self._request_field(extra, lab, f'{val:.2f} €', i, 0)
 
@@ -4567,21 +4567,22 @@ class App(tk.Tk):
 
         for i, (label, value) in enumerate(rows):
             is_total = label == 'Общо печат'
-            is_labor = label in ('База за оскъпяване', 'Оскъпяване на труда')
             is_finance = label.strip().capitalize() in ('Печалба', 'Разходи')
-            
-            # Поставяме изрично background='#FFFFFF' на всеки Label при генерирането му
+
+            # Описанията са обикновен шрифт. Само „Общо печат“,
+            # „Печалба“ и „Разходи“ са болд. Стойностите с цени
+            # остават болднати както досега.
             ttk.Label(
                 self.print_price_diag, text=label,
                 background='#FFFFFF',
                 font=('Segoe UI', 10, 'bold') if is_total or is_finance else None
             ).grid(row=i, column=0, sticky='w', padx=(10, 4), pady=3)
-            
+
             ttk.Label(
                 self.print_price_diag, text=value,
                 style='Value.TLabel',
                 background='#FFFFFF',
-                font=('Segoe UI', 10, 'bold') if is_total or is_labor or is_finance else None
+                font=('Segoe UI', 10, 'bold') if is_total or is_finance or not is_finance else None
             ).grid(row=i, column=1, sticky='w', padx=(4, 10), pady=3)
 
         self.print_price_diag.columnconfigure(0, weight=0)
