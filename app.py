@@ -3955,6 +3955,7 @@ class App(tk.Tk):
             item = self.request_vars.get('item').get().strip() if hasattr(self, 'request_vars') and 'item' in self.request_vars else ''
             client = self.request_vars.get('client').get().strip() if hasattr(self, 'request_vars') and 'client' in self.request_vars else ''
             date = self.request_vars.get('date').get().strip() if hasattr(self, 'request_vars') and 'date' in self.request_vars else ''
+            paper = self.request_vars.get('paper').get().strip() if hasattr(self, 'request_vars') and 'paper' in self.request_vars else ''
 
             if is_book:
                 front = self.book_vars.get('front', tk.StringVar(value='')).get().strip()
