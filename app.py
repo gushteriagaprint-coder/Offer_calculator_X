@@ -3205,7 +3205,7 @@ class App(tk.Tk):
             'item': self.request_vars['item'].get().strip(),
             'client': self.request_vars['client'].get().strip(),
             'date': self.request_vars['date'].get().strip(),
-            'paper': self.request_vars['paper'].get().strip(),
+            'paper': self.request_vars['paper'].get().strip().upper(),
             'paper_type': self.request_vars['paper_type'].get().strip(),
             'paper_price': paper_per_sheet,
             'size': f"{r.get('product_w', 0):g}x{r.get('product_h', 0):g} мм" if r else '',
@@ -3605,7 +3605,7 @@ class App(tk.Tk):
             def hn(k, default=0):
                 try: return float(hv(k).replace(',', '.')) if hv(k) else float(default)
                 except Exception: return float(default)
-            paper_g = self.request_vars['paper'].get().strip(); paper_type = self.request_vars['paper_type'].get().strip()
+            paper_g = self.request_vars['paper'].get().strip().upper(); paper_type = self.request_vars['paper_type'].get()
             paper_parts = []
             if paper_g and paper_g != '-':
                 paper_parts.append(f'{paper_g} г')
@@ -3657,9 +3657,9 @@ class App(tk.Tk):
             surcharge_total = float(r.get('surcharge', 0) or 0)
             extra_rows=[]
             if abs(transport_total) > 1e-12:
-                extra_rows.append(('Транспорт', f'{transport_total:.2f} €'))
+                extra_rows.append(('ТРАНСПОРТ', f'{transport_total:.2f} €'))
             if abs(surcharge_total) > 1e-12:
-                extra_rows.append(('Оскъпяване на труда', f'{surcharge_total:.2f} €'))
+                extra_rows.append(('ОСКЪПЯВАНЕ НА ТРУДА', f'{surcharge_total:.2f} €'))
             for i,(lab,val) in enumerate(extra_rows):
                 self._request_field(extra, lab, val, i, 0)
 
