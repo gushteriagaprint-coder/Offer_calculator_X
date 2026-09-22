@@ -4025,12 +4025,13 @@ class App(tk.Tk):
                     finishes = [x for x in finishes if x not in ('Ел. монтаж', 'Транспорт')]
                 finish_text = ', '.join(finishes) if finishes else '—'
 
-            lines = [
+           lines = [
                 'КЛИЕНТСКА ОФЕРТА',
                 '',
                 f'Изделие: {item or "—"}',
                 f'Клиент: {client or "—"}',
                 f'Дата: {date or "—"}',
+                f'Хартия: {paper or "—"}',
                 '',
                 'ОСНОВНИ ПАРАМЕТРИ',
                 *([f'Размер на спирала: {size}',
