@@ -804,7 +804,11 @@ def calc(inputs: Inputs, repo: FormatRepository, forced_print=None, forced_repet
 
     electric_prices = {"без":0, "флаери":p("em_flayers",1.28), "листовки/стикери":p("em_leaflets",1.28), "етикети/визитки":p("em_labels",1.02),
                        "бошура/покана":p("em_brochure",2.56), "корици":p("em_covers",1.53), "плакат":p("em_poster",2.56), "страниране":p("em_pagination",0.25), "минимално":p("em_min",0.51)}
-    em_unit = electric_prices.get(inputs.electric_montage, 0)
+    # Полето е текстово; нормализираме избора, за да няма разлика от
+    # главни букви/интервали („Страниране“ и „страниране“).
+    electric_option = str(inputs.electric_montage or '').strip().lower()
+    em_unit = electric_prices.get(electric_option, 0)
+    # Ел. монтажът се таксува за всяко размножение на печатния лист.
     electric_montage = em_unit * reps
     if inputs.back_colors > 0 and inputs.turnover == "не":
         electric_montage *= 2
