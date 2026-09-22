@@ -3632,8 +3632,8 @@ class App(tk.Tk):
             _, mat = self._request_card(sheet, 'Материали', 1, 1, 1)
             mat.columnconfigure(0, weight=1)
             material_rows = [
-                ('Хартия', f'{paper_price:.3f} € цена/лист' if paper_price else ''),
-                ('Хартия', paper_manual),
+                ('ХАРТИЯ', f'{paper_price:.3f} € цена/лист' if paper_price else ''),
+                ('ХАРТИЯ', paper_manual),
             ]
             for i, (lab, val) in enumerate(material_rows):
                 if str(val).strip() and str(val).strip() not in ('0', '0.000', '—'):
