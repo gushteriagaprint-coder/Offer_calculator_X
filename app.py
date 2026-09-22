@@ -1548,7 +1548,7 @@ class App(tk.Tk):
             profit = total_value - expenses
 
             rows = [
-                ('Печат лице/гръб', f'{rate:.2f} €/цвят', 'Печат лице/гръб', f'{print_sum:.2f} €'),
+                ('Печат лице/гръб', f'{print_sum:.2f} €', 'Обръщане', turnover_txt),
                 ('Обръщане', turnover_txt, 'Дублаж', duplication_txt),
                 ('Печат над 1000', f'{over1000_cost:.2f} € / 1 пъти' if over1000_cost > 0 else '', 'Общо печат', f'{total_print:.2f} €'),
                 ('База за оскъпяване', base_txt, 'Оскъпяване на труда', f'{labor_surcharge:.2f} €' if labor_surcharge > 0 else ''),
@@ -3302,7 +3302,9 @@ class App(tk.Tk):
                 ('БР. ЛИСТА В КОЧАН / ОТ ЦВЯТ', f"{self._fmt_count(sheets_block)} листа × {self._fmt_count(paper_colors)} цвят/а"),
                 ('ТИРАЖ', self._fmt_count(clean)),
                 ('ЦВЕТНОСТ', color),
-                ('ОБРЪЩАНЕ', txt(r.get('turnover',hv('turnover'))).upper()),
+                # В engine резултатът „turnover“ е цена за обръщането, а в
+                # „Производствени параметри“ трябва да показваме избора да/не.
+                ('ОБРЪЩАНЕ', txt(hv('turnover')).upper()),
                 ('ФОРМАТ (НА Х-Я)', txt(r.get('source_format',''))),
                 ('ФОРМАТ ЗА ПЕЧАТ', txt(r.get('print_format',''))),
                 ('РАЗМНОЖЕНИЯ', self._fmt_count(r.get('repetitions',''))),
@@ -4525,7 +4527,6 @@ class App(tk.Tk):
         duplication_display = 'НЕ' if duplication_value <= 0 else f"{duplication_value:.2f} € / да"
 
         rows = [
-            ('Печат лице/гръб', f"{r.get('print_rate',0):.2f} €/цвят"),
             ('Печат лице/гръб', f"{r.get('print_face_back',0):.2f} €"),
             ('Обръщане', turnover_display),
             ('Дублаж', duplication_display),
