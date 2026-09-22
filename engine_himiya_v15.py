@@ -460,7 +460,6 @@ def calc_himiya(inp: HimiyaInputs, repo: FormatRepository, forced_repetitions=No
         turnover_cost = _excel_mround(2.7 * inp.back_colors * max(1, clean / 1000), 5) if inp.back_colors else 0
     else:
         turnover_cost = 0.0
-    print_cost += turnover_cost
 
     over1000_times = math.floor(clean / 1001)
     over1000_units = colors if inp.turnover in ('не','черно') else inp.front_colors
