@@ -452,7 +452,7 @@ def calc_himiya(inp: HimiyaInputs, repo: FormatRepository, forced_repetitions=No
     # Current workbook values are intentionally kept here as the exact worksheet
     # defaults; the main app can later expose them through the Prices tab.
     price_print = {'черно': 5.2, 'черно с обр.': 8.0, 'не': 8.0, 'да': 8.0}.get(inp.turnover, 8.0)
-    print_cost = colors * price_print if inp.turnover in ('не','черно') else inp.front_colors * price_print
+    print_face_back = colors * price_print if inp.turnover in ('не','черно') else inp.front_colors * price_print
 
     if inp.turnover == 'да':
         turnover_cost = 2.7 * inp.back_colors * max(1, math.ceil(clean / 1000)) if inp.back_colors else 0
@@ -464,6 +464,10 @@ def calc_himiya(inp: HimiyaInputs, repo: FormatRepository, forced_repetitions=No
     over1000_times = math.floor(clean / 1001)
     over1000_units = colors if inp.turnover in ('не','черно') else inp.front_colors
     over1000 = over1000_units * 2.7 * over1000_times
+
+    # Общата цена на печата е една сума: лице/гръб + обръщане + над 1000.
+    # Отделните компоненти остават налични за показване и диагностика.
+    print_cost = print_face_back + turnover_cost + over1000
 
     plate_cost = 0.0
     if inp.plates == 'да':
@@ -572,15 +576,21 @@ def calc_himiya(inp: HimiyaInputs, repo: FormatRepository, forced_repetitions=No
         'electric_montage': (0.0 if inp.electric_montage in ('','без') else {'бошура/покана':2.56,'етикети/визитки':1.02,'корици':1.53,'листовки/стикери':1.28,'минимално':0.51,'плакат':2.56,'страниране':0.25,'флаери':1.28}.get(inp.electric_montage,0.0) * (2 if inp.back_colors > 0 and inp.turnover == 'не' else 1)),
         'separators':separator_cost, 'transport':delivery,
     }
-    labor_base = sum(costs[k] for k in ('print','turnover','over1000','cutting','numbering','perforation','prepress','bigoving','gluing','sewing','typesetting','counting','other','electric_montage','separators'))
+    # За оскъпяването печатът участва само веднъж.
+    # print_cost вече съдържа turnover + over1000, затова компонентите
+    # turnover/over1000 не се добавят втори път към базата.
+    labor_base = print_cost + sum(costs[k] for k in ('cutting','numbering','perforation','prepress','bigoving','gluing','sewing','typesetting','counting','other','electric_montage','separators'))
     surcharge = math.ceil(labor_base) * inp.surcharge_pct / 100 if inp.surcharge_pct > 0 else 0
-    total = math.ceil((sum(costs.values()) + surcharge) * 10) / 10
+
+    # По същия принцип и общата сума използва агрегирания печат само веднъж.
+    total_base = paper + print_cost + plate_cost + cutting + numbering + perforation + max(0, inp.prepress_price) + bigoving + gluing + sewing + typesetting + counting + max(0, inp.other_price) + costs['electric_montage'] + separator_cost + delivery
+    total = math.ceil((total_base + surcharge) * 10) / 10
     return {
         'source_format':inp.source_format,'print_format':inp.print_format,'product_w':inp.product_w,'product_h':inp.product_h,
         'unit_pieces':unit_pieces,'quantity':inp.quantity,'sheets_per_block':inp.sheets_per_block,'front_colors':inp.front_colors,'back_colors':inp.back_colors,
         'repetitions':reps,'clean_sheets':clean,'waste_sheets':waste,'total_turnover':total_turnover,'whole_sheets':whole_sheets,'package_color':package_color,
         'paper_colors':inp.paper_colors, 'separator_sheets':separator_sheets, 'plate_count': (int(plate_count) if 'plate_count' in locals() else 0),
-        'print_rate':price_print, 'print_face_back': (colors * price_print if inp.turnover in ('не','черно') else inp.front_colors * price_print),
+        'print_rate':price_print, 'print_face_back': print_face_back,
         'turnover_cost':turnover_cost, 'over1000_cost':over1000,
         **costs,'surcharge':surcharge,'labor_base':labor_base,'total':total,'unit':total/inp.quantity if inp.quantity else 0,'profit':total-(paper+other if False else 0),
     }
