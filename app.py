@@ -1557,14 +1557,15 @@ class App(tk.Tk):
             for rr,(l1,v1,l2,v2) in enumerate(rows):
                 finance1 = l1 in ('Печалба','Разходи')
                 finance2 = l2 in ('Печалба','Разходи')
-                # Всички редове в ценообразуването са болд, с изключение на
-                # „Печалба“ и „Разходи“, които запазват досегашния стил.
-                style1 = 'HimiyaPrice.TLabel' if finance1 else 'HimiyaPriceBold.TLabel'
-                style2 = 'HimiyaPrice.TLabel' if finance2 else 'HimiyaPriceBold.TLabel'
-                ttk.Label(grid,text=l1,style=style1).grid(row=rr,column=0,sticky='w',padx=6,pady=3)
-                ttk.Label(grid,text=v1,style=style1).grid(row=rr,column=1,sticky='w',padx=4,pady=3)
-                ttk.Label(grid,text=l2,style=style2).grid(row=rr,column=2,sticky='w',padx=6,pady=3)
-                ttk.Label(grid,text=v2,style=style2).grid(row=rr,column=3,sticky='w',padx=4,pady=3)
+                # Описанията са болд само на „Общо печат“, „Печалба“ и „Разходи“.
+                # Всички стойности/цени остават болднати.
+                label_style1 = 'HimiyaPriceBold.TLabel' if (l1 == 'Общо печат' or finance1) else 'HimiyaPrice.TLabel'
+                label_style2 = 'HimiyaPriceBold.TLabel' if (l2 == 'Общо печат' or finance2) else 'HimiyaPrice.TLabel'
+                value_style = 'HimiyaPriceBold.TLabel'
+                ttk.Label(grid,text=l1,style=label_style1).grid(row=rr,column=0,sticky='w',padx=6,pady=3)
+                ttk.Label(grid,text=v1,style=value_style).grid(row=rr,column=1,sticky='w',padx=4,pady=3)
+                ttk.Label(grid,text=l2,style=label_style2).grid(row=rr,column=2,sticky='w',padx=6,pady=3)
+                ttk.Label(grid,text=v2,style=value_style).grid(row=rr,column=3,sticky='w',padx=4,pady=3)
 
             # Диагностика на довършителните операции.
             # За разделителите Excel използва:
@@ -3675,7 +3676,7 @@ class App(tk.Tk):
             if sv('spiral_perfo_x2').lower()=='да': finish.append('Спирала и перфо ×2')
             if sv('cut_per_tooth').lower()=='да': finish.append('За нарязване/зъб')
             if sv('hooks').lower() not in ('','без'): finish.append('Закачане + кукички')
-            finish_text=' • '.join(finish) if finish else '—'
+            finish_text=' • '.join(str(x).upper() for x in finish) if finish else '—'
             _, prod = self._request_card(sheet, 'Производствени параметри', 0, 1, 1)
             self._request_production_display(prod, active, r)
 
