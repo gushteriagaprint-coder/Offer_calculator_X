@@ -3661,7 +3661,7 @@ class App(tk.Tk):
             if abs(surcharge_total) > 1e-12:
                 extra_rows.append(('ОСКЪПЯВАНЕ НА ТРУДА', f'{surcharge_total:.2f} €'))
             for i,(lab,val) in enumerate(extra_rows):
-                self._request_field(extra, lab, val, i, 0)
+                self._request_field(extra, lab, val, i, 0, value_bold=True)
 
             _, res = self._request_card(sheet, 'Резултати', 3, 1, 1)
             res.columnconfigure(0, weight=1)
