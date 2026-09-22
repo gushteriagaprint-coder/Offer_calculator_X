@@ -218,6 +218,8 @@ def find_best_sheet_logic(repo, source, prod_w, prod_h, turnover, useful_grip):
         w, h = parse_size(opt.print_format)
         sheet_area = w * h
         product_area = prod_w * prod_h
+        if sheet_area <= 0:
+            continue
         waste_pct = max(0.0, (1.0 - (product_area * reps) / (sheet_area * 100.0)) * 100.0)
         candidates.append((opt, reps, waste_pct, sheet_area))
 
