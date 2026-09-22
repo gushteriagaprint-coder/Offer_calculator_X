@@ -3605,7 +3605,7 @@ class App(tk.Tk):
             def hn(k, default=0):
                 try: return float(hv(k).replace(',', '.')) if hv(k) else float(default)
                 except Exception: return float(default)
-            paper_g = self.request_vars['paper'].get().strip().upper(); paper_type = self.request_vars['paper_type'].get().strip().upper()
+            paper_g = self.request_vars['paper'].get().strip().upper(); paper_type = self.request_vars['paper_type'].get()
             paper_parts = []
             if paper_g and paper_g != '-':
                 paper_parts.append(f'{paper_g} г')
