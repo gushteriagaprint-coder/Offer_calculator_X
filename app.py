@@ -3008,7 +3008,7 @@ class App(tk.Tk):
              ('Брой', 'sep_n', None, '0')),
 
             (('Транспорт', 'transport', ['не','да','доставка+'], 'не'),
-             ('Друго', 'other', None, '')),
+             ('Километри', 'km', None, '15')),
 
             (('Оскъпяване, %', 'surcharge', None, '40'),
              (None, None, None, None)),
