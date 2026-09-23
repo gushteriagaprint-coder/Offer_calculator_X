@@ -1469,7 +1469,7 @@ class App(tk.Tk):
                 # Вътрешно подаваме листата в кочан като делител за формулата на Excel;
                 # това не е ръчно поле и не се показва на потребителя.
                 separators=max(1, int(n('sheets'))),
-                transport=self._hvar('transport').get(), surcharge_pct=n('surcharge',40), useful_grip=self._hvar('grip').get())
+                transport=self._hvar('transport').get(), transport_km=n('km',15), fuel_price=float(str(self.vars.get('price_fuel').get() if 'price_fuel' in self.vars else '1.15').replace(',','.')), surcharge_pct=n('surcharge',40), useful_grip=self._hvar('grip').get())
             forced_reps=None
             if self._hvar('repetition_mode').get().strip().lower() == 'ръчно':
                 raw=self._hvar('repetitions_manual').get().strip()
