@@ -392,6 +392,8 @@ class HimiyaInputs:
     separators_material: str = "без"
     separators: int = 0
     transport: str = "не"
+    transport_km: float = 15.0
+    fuel_price: float = 1.15
     surcharge_pct: float = 40.0
     useful_grip: str = "не"
 
@@ -555,9 +557,9 @@ def calc_himiya(inp: HimiyaInputs, repo: FormatRepository, forced_repetitions=No
         separator_cost = math.ceil(separator_sheets * unit * 2) / 2
 
     if inp.transport == 'да':
-        delivery = 2.7 if total_turnover <= 1000 else 1.53 + (total_turnover/1500)*1.53
+        delivery = 7.67 * inp.transport_km / 100 * inp.fuel_price + 1
     elif inp.transport == 'доставка+':
-        delivery = (2.7 if total_turnover <= 1000 else 1.53 + (total_turnover/1500)*1.53) + 5
+        delivery = 7.67 * inp.transport_km / 100 * inp.fuel_price + 2.3
     else:
         delivery = 0.0
 
