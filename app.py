@@ -1950,6 +1950,64 @@ class App(tk.Tk):
         }
         return data.get(str(size).strip(),('', ''))
 
+    def _estimate_spiral_recommendation(self):
+        """
+        Ориентировъчно препоръчва спирала според грамажа и броя листа.
+        Изчислението е само информационно и не участва в ценообразуването.
+        """
+        try:
+            num = lambda k: float(self._spiral_var(k, '').get().strip().replace(',', '.')) if self._spiral_var(k, '').get().strip() else 0.0
+            body_gsm = max(0.0, num('body_gsm'))
+            body_sheets = max(0.0, num('body_sheets'))
+            cover_gsm = max(0.0, num('cover_gsm'))
+            cover_sheets = max(0.0, num('cover_sheets'))
+
+            if body_gsm <= 0 or body_sheets <= 0:
+                return None, None, None
+
+            # Приблизителна дебелина на един лист (mm) според грамажа.
+            # Това е ориентировъчна оценка, а не производствена спецификация.
+            body_thickness = body_gsm * 0.00080
+            cover_thickness = cover_gsm * 0.00080 if cover_gsm > 0 else 0.0
+            block_thickness = body_sheets * body_thickness + cover_sheets * cover_thickness
+
+            # Малък запас за сгъване/компресия и реални вариации на хартията.
+            required_thickness = block_thickness * 1.15
+
+            # Приблизителен използваем капацитет на спиралата.
+            # Използваме 50% от вътрешния диаметър като консервативен ориентир.
+            sizes = ['3/16', '1/4', '5/16', '3/8', '7/16', '1/2', '9/16']
+            recommendation = None
+            recommendation_mm = None
+            for size in sizes:
+                mm, _ = self._spiral_size_info(size)
+                if mm and required_thickness <= (float(mm) * 0.50):
+                    recommendation = size
+                    recommendation_mm = float(mm)
+                    break
+
+            if recommendation is None:
+                recommendation = sizes[-1]
+                recommendation_mm = float(self._spiral_size_info(recommendation)[0])
+
+            return block_thickness, required_thickness, (recommendation, recommendation_mm)
+        except Exception:
+            return None, None, None
+
+    def _update_spiral_recommendation(self, *args):
+        block, required, recommendation = self._estimate_spiral_recommendation()
+        label = self.spiral_diag_labels.get('recommended_spiral') if hasattr(self, 'spiral_diag_labels') else None
+        thickness_label = self.spiral_diag_labels.get('estimated_thickness') if hasattr(self, 'spiral_diag_labels') else None
+        if not label or not thickness_label:
+            return
+        if block is None or recommendation is None:
+            label.configure(text='—')
+            thickness_label.configure(text='—')
+            return
+        size, mm = recommendation
+        label.configure(text=f'{size}" ({mm:g} мм)')
+        thickness_label.configure(text=f'{required:.2f} мм (блок: {block:.2f} мм)')
+
     def _update_spiral_tooth_helper(self,*args):
         try:
             raw=self._spiral_var('length','').get().strip().replace(',','.')
@@ -1963,6 +2021,7 @@ class App(tk.Tk):
         self.spiral_diag_labels.get('mm',tk.Label()).configure(text=f'{mm:g}' if mm else '—')
         self.spiral_diag_labels.get('sheets_per_body',tk.Label()).configure(text=str(norm) if norm else '—')
         self.spiral_diag_labels.get('sheets_per_hit',tk.Label()).configure(text=str(norm+1) if norm else '—')
+        self._update_spiral_recommendation()
 
     def _spirals(self, f):
         self.spiral_vars = {}; self.spiral_result = {}; self.spiral_diag_labels = {}
@@ -1993,6 +2052,8 @@ class App(tk.Tk):
             w.grid(row=i, column=1, sticky='w', padx=8, pady=4)
             if key == 'size':
                 w.bind('<<ComboboxSelected>>', self._update_spiral_tooth_helper)
+            elif key in ('body_gsm', 'body_sheets', 'cover_gsm', 'cover_sheets'):
+                w.bind('<KeyRelease>', self._update_spiral_recommendation)
 
         # 2. Колона 1: Довършителни / ръчни операции
         fin = self.card(outer, 'Довършителни / ръчни операции')
@@ -2024,7 +2085,9 @@ class App(tk.Tk):
             ('Изчислени зъби', 'teeth_calc', '—'),
             ('Размер, мм', 'mm', '—'),
             ('Листа за 1 тяло', 'sheets_per_body', '—'),
-            ('Листа за 1 перфориране', 'sheets_per_hit', '—')
+            ('Листа за 1 перфориране', 'sheets_per_hit', '—'),
+            ('Ориентировъчна дебелина', 'estimated_thickness', '—'),
+            ('Препоръчителна спирала', 'recommended_spiral', '—')
         ]
         for i, (lab, key, d) in enumerate(drows):
             ttk.Label(diag, text=lab, style='Card.TLabel').grid(row=i, column=0, sticky='w', padx=8, pady=4)
