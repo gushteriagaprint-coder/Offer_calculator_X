@@ -1333,7 +1333,7 @@ class App(tk.Tk):
             (('Ел. монтаж','em',['без','бошура/покана','етикети/визитки','корици','листовки/стикери','минимално','плакат','страниране','флаери'],'без','electric_montage'),('Пакетиране','counting',['да','<1000','не'],'да','counting')),
             (('Разделители','sep_mat',['без','вестник','картон'],'без','separators'),(None,None,None,None,None)),
             (('Операции, друго','other',None,'','other'),(None,None,None,None,None)),
-            (('Транспорт','transport',['не','да','доставка+'],'не','transport'),(None,None,None,None,None)),
+            (('Транспорт','transport',['не','да','доставка+'],'не','transport'),  ('Километри','km',None,'15',None)),
         ]
         self.h_finish_price_labels={}; self.h_sep_sheets_label=None
         for r_idx,(left_item,right_item) in enumerate(finish):
