@@ -3376,7 +3376,7 @@ class App(tk.Tk):
                 ('ЕД. БРОЙКИ', f"{self._fmt_count(r.get('quantity',r.get('unit_pieces','')))} кочана"),
                 # Листовете и цветовете се показват като една производствена
                 # стойност: напр. „33 листа × 3 цвят/а“.
-                ('БР. ЛИСТА В КОЧАН / ОТ ЦВЯТ', f"{self._fmt_count(sheets_block)} листа × {self._fmt_count(paper_colors)} цвят/а"),
+                ('БР. ЛИСТА В КОЧАН / ОТ ЦВЯТ', f"{self._fmt_count(sheets_block)} листа в кочан/ {self._fmt_count(paper_colors)} цвята."),
                 ('ТИРАЖ', self._fmt_count(clean)),
                 ('ЦВЕТНОСТ', color),
                 # В engine резултатът „turnover“ е цена за обръщането, а в
