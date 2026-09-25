@@ -3086,6 +3086,10 @@ class App(tk.Tk):
              (None, None, None, None)),
         ]
 
+        # Цена на всяка довършителна операция — показва се непосредствено
+        # вдясно от съответното поле, както в останалите калкулатори.
+        self.finish_price_labels = {}
+
         for r, (left_item, right_item) in enumerate(rows):
             for c, item in ((0, left_item), (2, right_item)):
                 lab, key, vals, default = item
@@ -3103,9 +3107,38 @@ class App(tk.Tk):
 
                 w.grid(
                     row=r, column=c+1,
+                    padx=(0, 5),
+                    pady=4, sticky='w'
+                )
+
+                price_lbl = ttk.Label(
+                    operations, text='', style='Value.TLabel',
+                    background='#FFFFFF', width=8, anchor='w'
+                )
+                price_lbl.grid(
+                    row=r, column=c+2,
                     padx=(0, 8 if c == 2 else 10),
                     pady=4, sticky='w'
                 )
+
+                price_key = {
+                    'cutting': 'cutting',
+                    'gluing': 'gluing',
+                    'numbering': 'numbering',
+                    'perforation': 'perforation',
+                    'big_type': 'bigoving',
+                    'typesetting': 'typesetting',
+                    'sewing': 'sewing',
+                    'em': 'electric_montage',
+                    'counting': 'counting',
+                    'sep_mat': 'separators',
+                    'transport': 'transport',
+                    'surcharge': 'surcharge',
+                    'other': 'other_operations',
+                }.get(key)
+
+                if price_key:
+                    self.finish_price_labels[key] = price_lbl
 
         # Диагностиката остава непосредствено под довършителните операции.
         diag_box = self.card(f, 'Диагностика — довършителни')
