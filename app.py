@@ -1492,9 +1492,25 @@ class App(tk.Tk):
             self.h_material_paper.configure(text=f"{float(r.get('paper',0) or 0):.2f} €")
             self.h_material_plates.configure(text=f"{float(r.get('plates',0) or 0):.2f} €")
             # Цените на довършителните операции са непосредствено до полетата.
+            # Важно: показваме и 0.00 €, за да не зависи визуализацията
+            # от това дали избраният метод връща минимална/нулева стойност.
             for key, label_widget in getattr(self, 'h_finish_price_labels', {}).items():
-                value = float(r.get(key, 0) or 0)
-                label_widget.configure(text=f"{value:.2f} €" if value > 0 else '')
+                try:
+                    value = float(r.get(key, 0) or 0)
+                except (TypeError, ValueError):
+                    value = 0.0
+                label_widget.configure(text=f"{value:.2f} €")
+
+            # Рязането има няколко различни метода („стандарт“, „форматиране“,
+            # „март. Ани“, „други“). Обновяваме етикета му изрично след всяка
+            # калкулация, за да не остава празен при смяна на метода.
+            cutting_label = getattr(self, 'h_finish_price_labels', {}).get('cutting')
+            if cutting_label is not None:
+                try:
+                    cutting_value = float(r.get('cutting', 0) or 0)
+                except (TypeError, ValueError):
+                    cutting_value = 0.0
+                cutting_label.configure(text=f"{cutting_value:.2f} €")
             diag_values={
                 'h_product_size': f"{r['product_w']:g} × {r['product_h']:g} мм",
                 'h_source_format': str(r.get('source_format','')),
