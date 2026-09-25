@@ -4058,9 +4058,11 @@ class App(tk.Tk):
                 turnover = str(r.get('turnover', '—')).strip() or '—'
                 print_format = str(r.get('print_format', '—')).strip() or '—'
             elif is_h:
-                front = self._hvar('front').get() or ''
-                back = self._hvar('back').get() or ''
-                color = f'{front} + {back}'.strip(' +')
+                # Взимаме реалния брой цветове на листа (paper_colors) вместо цветността за печат
+                paper_colors_val = r.get('paper_colors', self._hvar('paper_colors').get() or '1')
+                front = self._hvar('front').get() or '0'
+                back = self._hvar('back').get() or '0'
+                color = f'{front} + {back}'
                 size = f"{r.get('product_w',0):g} × {r.get('product_h',0):g} мм"
                 qty = (f"{r.get('quantity', '')} кочана х {r.get('sheets_per_block', self._hvar('sheets').get() or '')} л." if r.get('quantity') else f"{r.get('unit_pieces','')} бр.")
                 turnover = self._hvar('turnover').get() or '—'
@@ -4114,7 +4116,7 @@ class App(tk.Tk):
                 *([f'Страници: {r.get("pages", self.book_vars.get("pages", tk.StringVar(value="")).get() or "—")}',
                    f'Размножения: {r.get("repetitions", "—")}'] if is_book or is_calendar else []),
                 *([f'Брой коли: {self._fmt_count(r.get("cols", "—"))}'] if is_book or is_calendar else []),
-                *([f'Брой цветове листа: {color}'] if is_h else []),
+                *([f'Цвята листа: {color}'] if is_h else []),
                 *([f'Брой зъби: {spiral_teeth}',
                    f'Тяло: {body_sheets} листа / {body_gsm} грамаж',
                    f'Корица: {cover_sheets} листа / {cover_gsm} грамаж',
@@ -4241,7 +4243,7 @@ class App(tk.Tk):
                     row(f'ХАРТИЯ: {paper_price_text}', f'формат (на х-я): {r.get("source", bv("source")) or "—"}'), border(),
                     row(paper_manual, f'формат за ПЕЧАТ: {r.get("print_format", "—")}'), border(),
                     row(f'ПЕЧАТНИ КОЛИ: {r.get("cols", "—")}', f'ТИРАЖ: {clean}'), border(),
-                    row(f'ТИРАЖ + МАКУЛАТУРА: {waste} листа (вкл. макулатура)', f'ЦЕЛИ ЛИСТА: {whole} листа'), border(),
+                    row(f'ТИРАЖ: {clean}', f'{whole} листа (вкл. макулатура)'), border(), 
                     row(f'ЦВЕТНОСТ: {color}', f'ОБРЪЩАНЕ: {turnover.upper() if turnover else "—"}'), border(),
                     row(f'ОБРЯЗАН РАЗМЕР: {size}', ''), border(),
                     full('ДОВЪРШИТЕЛНИ РАБОТИ', True),
@@ -4344,11 +4346,11 @@ class App(tk.Tk):
                 lines += [
                     row(f'КЛИЕНТ: {client or "—"}', f'ДАТА: {date or "—"}'), border(),
                     row(f'ИЗДЕЛИЕ: {item or "—"}', f'ЦЕНА БЕЗ ДДС: {total:.2f}'), border(),
-                    row(f'ЕД. БРОЙКИ: {qty} кочана', f'ед. бройка: {unit:.4f}'), border(),
-                    row(f'{sheets_block} листа в кочан/ от цвят', f'ЦВЯТА листа: {paper_colors} цвят/а'), border(),
+                    row(f'БРОЙКИ: {qty} кочана х {sheets_block} листа', f'ед. бройка: {unit:.4f}'), border(),
+                    row(f'БРОЙКИ: {qty} кочана х {sheets_block} листа', f'ЦВЯТА листа: {paper_colors} цвят/а'), border(),
                     row(f'ХАРТИЯ: {paper_price_text}', f'формат (на х-я): {r.get("source_format", "—")}'), border(),
                     row(paper_manual, f'формат за ПЕЧАТ: {r.get("print_format", "—")}'), border(),
-                    row(f'TИРАЖ: {clean}', f'размножения: {reps}'), border(),
+                    row(f"{r.get('total_turnover', '')} листа (вкл. макулатура)", f'размножения: {reps}'), border(),
                     row(f'ЦВЕТНОСТ: {color}', f'ОБРЪЩАНЕ: {turnover.upper() if turnover else "—"}'), border(),
                     row(f'{whole} листа/ цвят (вкл. макулатура)', f'ОБРЯЗАН РАЗМЕР: {size}'), border(),
                     full('ДОВЪРШИТЕЛНИ РАБОТИ', True),
