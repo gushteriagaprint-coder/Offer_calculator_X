@@ -1492,25 +1492,9 @@ class App(tk.Tk):
             self.h_material_paper.configure(text=f"{float(r.get('paper',0) or 0):.2f} €")
             self.h_material_plates.configure(text=f"{float(r.get('plates',0) or 0):.2f} €")
             # Цените на довършителните операции са непосредствено до полетата.
-            # Важно: показваме и 0.00 €, за да не зависи визуализацията
-            # от това дали избраният метод връща минимална/нулева стойност.
             for key, label_widget in getattr(self, 'h_finish_price_labels', {}).items():
-                try:
-                    value = float(r.get(key, 0) or 0)
-                except (TypeError, ValueError):
-                    value = 0.0
-                label_widget.configure(text=f"{value:.2f} €")
-
-            # Рязането има няколко различни метода („стандарт“, „форматиране“,
-            # „март. Ани“, „други“). Обновяваме етикета му изрично след всяка
-            # калкулация, за да не остава празен при смяна на метода.
-            cutting_label = getattr(self, 'h_finish_price_labels', {}).get('cutting')
-            if cutting_label is not None:
-                try:
-                    cutting_value = float(r.get('cutting', 0) or 0)
-                except (TypeError, ValueError):
-                    cutting_value = 0.0
-                cutting_label.configure(text=f"{cutting_value:.2f} €")
+                value = float(r.get(key, 0) or 0)
+                label_widget.configure(text=f"{value:.2f} €" if value > 0 else '')
             diag_values={
                 'h_product_size': f"{r['product_w']:g} × {r['product_h']:g} мм",
                 'h_source_format': str(r.get('source_format','')),
@@ -3102,10 +3086,6 @@ class App(tk.Tk):
              (None, None, None, None)),
         ]
 
-        # Цена на всяка довършителна операция — показва се непосредствено
-        # вдясно от съответното поле, както в останалите калкулатори.
-        self.finish_price_labels = {}
-
         for r, (left_item, right_item) in enumerate(rows):
             for c, item in ((0, left_item), (2, right_item)):
                 lab, key, vals, default = item
@@ -3123,38 +3103,9 @@ class App(tk.Tk):
 
                 w.grid(
                     row=r, column=c+1,
-                    padx=(0, 5),
-                    pady=4, sticky='w'
-                )
-
-                price_lbl = ttk.Label(
-                    operations, text='', style='Value.TLabel',
-                    background='#FFFFFF', width=8, anchor='w'
-                )
-                price_lbl.grid(
-                    row=r, column=c+2,
                     padx=(0, 8 if c == 2 else 10),
                     pady=4, sticky='w'
                 )
-
-                price_key = {
-                    'cutting': 'cutting',
-                    'gluing': 'gluing',
-                    'numbering': 'numbering',
-                    'perforation': 'perforation',
-                    'big_type': 'bigoving',
-                    'typesetting': 'typesetting',
-                    'sewing': 'sewing',
-                    'em': 'electric_montage',
-                    'counting': 'counting',
-                    'sep_mat': 'separators',
-                    'transport': 'transport',
-                    'surcharge': 'surcharge',
-                    'other': 'other_operations',
-                }.get(key)
-
-                if price_key:
-                    self.finish_price_labels[key] = price_lbl
 
         # Диагностиката остава непосредствено под довършителните операции.
         diag_box = self.card(f, 'Диагностика — довършителни')
@@ -4394,13 +4345,13 @@ class App(tk.Tk):
                     row(f'КЛИЕНТ: {client or "—"}', f'ДАТА: {date or "—"}'), border(),
                     row(f'ИЗДЕЛИЕ: {item or "—"}', f'ЦЕНА БЕЗ ДДС: {total:.2f}'), border(),
                     row(f'ЕД. БРОЙКИ: {qty} кочана', f'ед. бройка: {unit:.4f}'), border(),
-                    row(f'{sheets_block} листа в кочан/ цвят',
-                        f'ЦВЯТА листа: {paper_colors} цвят/а'), border(),
+                    row(f'бр. листа в кочан/ от цвят: {sheets_block} листа в кочан',
+                        f'бр. ЦВЯТА листа: {paper_colors} цвят/а'), border(),
                     row(f'ХАРТИЯ: {paper_price_text}', f'формат (на х-я): {r.get("source_format", "—")}'), border(),
                     row(paper_manual, f'формат за ПЕЧАТ: {r.get("print_format", "—")}'), border(),
                     row(f'TИРАЖ: {clean}', f'размножения: {reps}'), border(),
                     row(f'ЦВЕТНОСТ: {color}', f'ОБРЪЩАНЕ: {turnover.upper() if turnover else "—"}'), border(),
-                    row(f'{whole} листа/ цвят (вкл. макулатура)', f'ОБРЯЗАН РАЗМЕР: {size}'), border(),
+                    row(f'ЦЕЛИ ЛИСТА: {whole} листа/ цвят (вкл. макулатура)', f'ОБРЯЗАН РАЗМЕР: {size}'), border(),
                     full('ДОВЪРШИТЕЛНИ РАБОТИ', True),
                     *[f'| {line} |' for line in full_wrapped(f'{finish_line}')]
                 ]
