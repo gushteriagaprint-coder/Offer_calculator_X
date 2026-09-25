@@ -4345,13 +4345,12 @@ class App(tk.Tk):
                     row(f'КЛИЕНТ: {client or "—"}', f'ДАТА: {date or "—"}'), border(),
                     row(f'ИЗДЕЛИЕ: {item or "—"}', f'ЦЕНА БЕЗ ДДС: {total:.2f}'), border(),
                     row(f'ЕД. БРОЙКИ: {qty} кочана', f'ед. бройка: {unit:.4f}'), border(),
-                    row(f'бр. листа в кочан/ от цвят: {sheets_block} листа в кочан',
-                        f'бр. ЦВЯТА листа: {paper_colors} цвят/а'), border(),
+                    row(f'{sheets_block} листа в кочан/ от цвят', f'ЦВЯТА листа: {paper_colors} цвят/а'), border(),
                     row(f'ХАРТИЯ: {paper_price_text}', f'формат (на х-я): {r.get("source_format", "—")}'), border(),
                     row(paper_manual, f'формат за ПЕЧАТ: {r.get("print_format", "—")}'), border(),
                     row(f'TИРАЖ: {clean}', f'размножения: {reps}'), border(),
                     row(f'ЦВЕТНОСТ: {color}', f'ОБРЪЩАНЕ: {turnover.upper() if turnover else "—"}'), border(),
-                    row(f'ЦЕЛИ ЛИСТА: {whole} листа/ цвят (вкл. макулатура)', f'ОБРЯЗАН РАЗМЕР: {size}'), border(),
+                    row(f'{whole} листа/ цвят (вкл. макулатура)', f'ОБРЯЗАН РАЗМЕР: {size}'), border(),
                     full('ДОВЪРШИТЕЛНИ РАБОТИ', True),
                     *[f'| {line} |' for line in full_wrapped(f'{finish_line}')]
                 ]
