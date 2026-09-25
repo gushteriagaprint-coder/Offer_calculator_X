@@ -4116,7 +4116,7 @@ class App(tk.Tk):
                 *([f'Страници: {r.get("pages", self.book_vars.get("pages", tk.StringVar(value="")).get() or "—")}',
                    f'Размножения: {r.get("repetitions", "—")}'] if is_book or is_calendar else []),
                 *([f'Брой коли: {self._fmt_count(r.get("cols", "—"))}'] if is_book or is_calendar else []),
-                *([f'Цвята листа: {color}'] if is_h else []),
+                *([f'Цвята листа: {paper_colors_val}'] if is_h else []),
                 *([f'Брой зъби: {spiral_teeth}',
                    f'Тяло: {body_sheets} листа / {body_gsm} грамаж',
                    f'Корица: {cover_sheets} листа / {cover_gsm} грамаж',
