@@ -4300,6 +4300,40 @@ class App(tk.Tk):
                     except Exception:
                         return float(default)
 
+                # Компактен TXT/печатен шаблон само за Кочани.
+                # Екранният изглед и калкулациите не се променят.
+                INNER_W = 53
+                COL_W = 25
+
+                def cfit(value, width, align='left'):
+                    text = str(value if value is not None else '')
+                    text = text.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ')
+                    if len(text) > width:
+                        text = text[:max(0, width - 1)] + '…'
+                    if align == 'right':
+                        return text.rjust(width)
+                    if align == 'center':
+                        return text.center(width)
+                    return text.ljust(width)
+
+                def cborder():
+                    return '+' + '-' * INNER_W + '+'
+
+                def crow(left='', right=''):
+                    return '| ' + cfit(left, COL_W) + ' | ' + cfit(right, COL_W) + ' |'
+
+                def cfull(text='', center=False):
+                    return '| ' + cfit(text, INNER_W, 'center' if center else 'left') + ' |'
+
+                def cfull_wrapped(text=''):
+                    raw = str(text if text is not None else '')
+                    raw = raw.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ')
+                    chunks = textwrap.wrap(
+                        raw, width=INNER_W, break_long_words=False,
+                        break_on_hyphens=False, replace_whitespace=True
+                    ) or ['']
+                    return [cfull(chunk) for chunk in chunks]
+
                 item = str(self.request_vars['item'].get() or '').strip()
                 client = str(self.request_vars['client'].get() or '').strip()
                 date = str(self.request_vars['date'].get() or '').strip()
@@ -4309,11 +4343,9 @@ class App(tk.Tk):
                 qty = int(r.get('quantity') or hn('qty'))
                 sheets_block = int(r.get('sheets_per_block') or hn('sheets'))
                 paper_colors = int(r.get('paper_colors') or hn('paper_colors', 1))
-                clean = r.get('clean_sheets', '')
-                whole = r.get('whole_sheets', '')
                 reps = r.get('repetitions', '')
                 paper_price = hn('paper')
-                paper_price_text = f'{paper_price:.3f} € цена/ лист' if paper_price else '—'
+                paper_price_text = f'{paper_price:.3f} € /лист' if paper_price else '—'
                 front, back = hv('front'), hv('back')
                 color = f'{front} + {back}' if (front or back) else '—'
                 turnover = hv('turnover') or '—'
@@ -4322,15 +4354,18 @@ class App(tk.Tk):
                 unit = float(r.get('unit', 0) or 0)
 
                 if paper_g and paper_type:
-                    paper_manual = f'{paper_g} г {paper_type}'
+                    paper_manual = f'{paper_g} гр {paper_type}'
                 elif paper_g:
-                    paper_manual = f'{paper_g} г'
+                    paper_manual = f'{paper_g} гр'
                 elif paper_type:
                     paper_manual = paper_type
                 else:
                     paper_manual = '—'
 
-                finish = [x for x in self._client_offer_finish_list() if not x.startswith('Друго') and x != 'Транспорт']
+                finish = [
+                    x for x in self._client_offer_finish_list()
+                    if not x.startswith('Друго') and x not in ('Транспорт', 'Ел. монтаж')
+                ]
                 if hv('sep_mat').lower() not in ('', 'без', 'не'):
                     sep_sheets = r.get('separator_sheets')
                     if not sep_sheets:
@@ -4339,23 +4374,32 @@ class App(tk.Tk):
                         except Exception:
                             sep_sheets = 0
                     if sep_sheets:
-                        finish = [f'картон - {sep_sheets} цели листа' if x == 'Разделяне' else x for x in finish]
+                        finish = [
+                            f'картон - {sep_sheets} цели листа' if x == 'Разделяне' else x
+                            for x in finish
+                        ]
                 finish_line = ' ● '.join(str(x).strip() for x in finish if str(x).strip()) or '—'
 
-                # Подредбата е същата като в „Заявка_Невена“.
-                lines += [
-                    row(f'КЛИЕНТ: {client or "—"}', f'ДАТА: {date or "—"}'), border(),
-                    row(f'ИЗДЕЛИЕ: {item or "—"}', f'ЦЕНА БЕЗ ДДС: {total:.2f}'), border(),
-                    row(f'БРОЙКИ: {qty} кочана х {sheets_block} листа', f'ед. бройка: {unit:.4f}'), border(),
-                    row(f'БРОЙКИ: {qty} кочана х {sheets_block} листа', f'ЦВЯТА листа: {paper_colors} цвят/а'), border(),
-                    row(f'ХАРТИЯ: {paper_price_text}', f'формат (на х-я): {r.get("source_format", "—")}'), border(),
-                    row(paper_manual, f'формат за ПЕЧАТ: {r.get("print_format", "—")}'), border(),
-                    row(f"{r.get('total_turnover', '')} листа (вкл. макулатура)", f'размножения: {reps}'), border(),
-                    row(f'ЦВЕТНОСТ: {color}', f'ОБРЪЩАНЕ: {turnover.upper() if turnover else "—"}'), border(),
-                    row(f'{whole} листа/ цвят (вкл. макулатура)', f'ОБРЯЗАН РАЗМЕР: {size}'), border(),
-                    full('ДОВЪРШИТЕЛНИ РАБОТИ', True),
-                    *[f'| {line} |' for line in full_wrapped(f'{finish_line}')]
+                lines = [
+                    cborder(),
+                    cfull('ЗАЯВКА - рецепти', True),
+                    cborder(),
+                    crow(f'КЛИЕНТ: {client or "—"}', f'ДАТА: {date or "—"}'),
+                    crow(f'ОБРЯЗАН РАЗМЕР: {size}', ''),
+                    crow(f'ЕД. БРОЙКИ: {qty} кочана × {sheets_block} листа/цвят × {paper_colors} цвят/а', ''),
+                    crow(f'ЦВЕТНОСТ: {color}', f'ОБРЪЩАНЕ: {turnover.upper() if turnover else "—"}'),
+                    crow(f'ХАРТИЯ: {paper_price_text}', paper_manual),
+                    crow(f'ФОРМАТ: {r.get("source_format", "—")}', f'ПЕЧАТ: {r.get("print_format", "—")}'),
+                    crow(f'ТИРАЖ: {self._fmt_count(r.get("clean_sheets", ""))}', f'РАЗМНОЖЕНИЯ: {self._fmt_count(reps)}'),
+                    crow(f'{self._fmt_count(r.get("whole_sheets", ""))} листа/цвят (вкл. макулатура)', ''),
+                    cborder(),
+                    cfull('ДОВЪРШИТЕЛНИ РАБОТИ:'),
+                    *cfull_wrapped(finish_line),
+                    cborder(),
+                    crow(f'ЦЕНА БЕЗ ДДС: {total:.2f} €', f'ЕД. БРОЙКА: {unit:.4f} €'),
+                    cborder(),
                 ]
+
             else:
                 v = self._request_values()
                 paper_manual = f'{v["paper"]} г {v["paper_type"]}'.strip()
