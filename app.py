@@ -4409,18 +4409,59 @@ class App(tk.Tk):
                 finish_items = [x.strip() for x in (v.get('finish') or '').split('|') if x.strip()] or ['—']
                 finish_line = ' ● '.join(finish_items)
 
-                # Таб 1 използва същата конструкция и същите ширини като Химия.
-                lines += [
-                    row(f'КЛИЕНТ: {v["client"] or "—"}', f'ДАТА: {v["date"] or "—"}'), border(),
-                    row(f'ИЗДЕЛИЕ: {v["item"] or "—"}', f'ЦЕНА БЕЗ ДДС: {v["price"] or "—"}'), border(),
-                    row(f'ЕД. БРОЙКИ: {v["qty"] or "—"}', f'ед. бройка: {v["unit"] or "—"}'), border(),
-                    row(f'ЦВЕТНОСТ: {v["color"] or "—"}', f'ОБРЪЩАНЕ: {v["turnover"] or "—"}'), border(),
-                    row(f'ХАРТИЯ: {v["paper_price"] or "—"}', f'формат (на х-я): {v["source_format"] or "—"}'), border(),
-                    row(paper_manual, f'формат за ПЕЧАТ: {v["print_format"] or "—"}'), border(),
-                    row(f'TИРАЖ: {v["clean"] or "—"}', f'размножения: {v["reps"] or "—"}'), border(),
-                    row(f'{v["source_sheets"] or "—"} листа (вкл. макулатура)', f'ОБРЯЗАН РАЗМЕР: {v["size"] or "—"}'), border(),
-                    full('ДОВЪРШИТЕЛНИ РАБОТИ', True),
-                    *[f'| {line} |' for line in full_wrapped(f'{finish_line}')]
+                # Компактен TXT/печатен шаблон за таб „Основен“.
+                # Екранният изглед и калкулациите не се променят.
+                MAIN_INNER_W = 53
+                MAIN_COL_W = 25
+
+                def mfit(value, width, align='left'):
+                    text = str(value if value is not None else '')
+                    text = text.replace('\\t', ' ').replace('\\r', ' ').replace('\\n', ' ')
+                    if len(text) > width:
+                        text = text[:max(0, width - 1)] + '…'
+                    if align == 'right':
+                        return text.rjust(width)
+                    if align == 'center':
+                        return text.center(width)
+                    return text.ljust(width)
+
+                def mborder():
+                    return '+' + '-' * MAIN_INNER_W + '+'
+
+                def mrow(left='', right=''):
+                    return '| ' + mfit(left, MAIN_COL_W) + ' | ' + mfit(right, MAIN_COL_W) + ' |'
+
+                def mfull(text='', center=False):
+                    return '| ' + mfit(text, MAIN_INNER_W, 'center' if center else 'left') + ' |'
+
+                def mfull_wrapped(text=''):
+                    raw = str(text if text is not None else '')
+                    raw = raw.replace('\\t', ' ').replace('\\r', ' ').replace('\\n', ' ')
+                    import textwrap
+                    chunks = textwrap.wrap(
+                        raw, width=MAIN_INNER_W, break_long_words=False,
+                        break_on_hyphens=False, replace_whitespace=True
+                    ) or ['']
+                    return [mfull(chunk) for chunk in chunks]
+
+                lines = [
+                    mborder(),
+                    mfull(f'ЗАЯВКА - {v["item"] or "—"}', True),
+                    mborder(),
+                    mrow(f'КЛИЕНТ: {v["client"] or "—"}', f'ДАТА: {v["date"] or "—"}'),
+                    *mfull_wrapped(f'ОБРЯЗАН РАЗМЕР: {v["size"] or "—"}'),
+                    *mfull_wrapped(f'ЕД. БРОЙКИ: {v["qty"] or "—"}'),
+                    mrow(f'ЦВЕТНОСТ: {v["color"] or "—"}', f'ОБРЪЩАНЕ: {v["turnover"] or "—"}'),
+                    mrow(f'ХАРТИЯ: {v["paper_price"] or "—"}', paper_manual),
+                    mrow(f'ФОРМАТ: {v["source_format"] or "—"}', f'ПЕЧАТ: {v["print_format"] or "—"}'),
+                    mrow(f'TИРАЖ: {v["clean"] or "—"}', f'РАЗМНОЖЕНИЯ: {v["reps"] or "—"}'),
+                    *mfull_wrapped(f'{v["source_sheets"] or "—"} листа (вкл. макулатура)'),
+                    mborder(),
+                    mfull('ДОВЪРШИТЕЛНИ РАБОТИ:'),
+                    *mfull_wrapped(finish_line),
+                    mborder(),
+                    mrow(f'ЦЕНА БЕЗ ДДС: {v["price"] or "—"}', f'ЕД. БРОЙКА: {v["unit"] or "—"}'),
+                    mborder(),
                 ]
 
             path = filedialog.asksaveasfilename(
