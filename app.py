@@ -4258,6 +4258,41 @@ class App(tk.Tk):
                     except Exception:
                         return float(default)
 
+                # Компактен TXT/печатен шаблон за „Календари“.
+                # Екранният изглед и калкулациите не се променят.
+                INNER_W = 53
+                COL_W = 25
+
+                def cfit(value, width, align='left'):
+                    text = str(value if value is not None else '')
+                    text = text.replace('\\t', ' ').replace('\\r', ' ').replace('\\n', ' ')
+                    if len(text) > width:
+                        text = text[:max(0, width - 1)] + '…'
+                    if align == 'right':
+                        return text.rjust(width)
+                    if align == 'center':
+                        return text.center(width)
+                    return text.ljust(width)
+
+                def cborder():
+                    return '+' + '-' * INNER_W + '+'
+
+                def crow(left='', right=''):
+                    return '| ' + cfit(left, COL_W) + ' | ' + cfit(right, COL_W) + ' |'
+
+                def cfull(text='', center=False):
+                    return '| ' + cfit(text, INNER_W, 'center' if center else 'left') + ' |'
+
+                def cfull_wrapped(text=''):
+                    raw = str(text if text is not None else '')
+                    raw = raw.replace('\\t', ' ').replace('\\r', ' ').replace('\\n', ' ')
+                    import textwrap
+                    chunks = textwrap.wrap(
+                        raw, width=INNER_W, break_long_words=False,
+                        break_on_hyphens=False, replace_whitespace=True
+                    ) or ['']
+                    return [cfull(chunk) for chunk in chunks]
+
                 item = str(self.request_vars['item'].get() or '').strip()
                 client = str(self.request_vars['client'].get() or '').strip()
                 date = str(self.request_vars['date'].get() or '').strip()
@@ -4278,18 +4313,25 @@ class App(tk.Tk):
                 finish = [name for name,cost in (r.get('finish_costs',{}) or {}).items() if float(cost or 0)>0]
                 finish_line = ' ● '.join(str(x).strip() for x in finish if str(x).strip()) or '—'
 
-                lines += [
-                    row(f'ИЗДЕЛИЕ: {item or "Календари"}', f'КЛИЕНТ: {client or "—"}'), border(),
-                    row(f'ОБРЯЗАН РАЗМЕР: {r.get("trim_size", "—")}', f'ДАТА: {date or "—"}'), border(),
-                    row(f'ЕД. БРОЙКИ: {self._fmt_count(qty)} бр.', f'ЦЕНА БЕЗ ДДС: {total:.2f} €'), border(),
-                    row(f'ЦВЕТНОСТ: {color}', f'ед. бройка: {unit:.4f} €'), border(),
-                    row(f'ХАРТИЯ ЦЕНА: {paper_price_text}', f'формат (на х-я): {r.get("source_format", "—")}'), border(),
-                    row(f'ХАРТИЯ: {paper_manual}', f'формат за печат: {r.get("print_format", "—")}'), border(),
-                    row(f'бр. страници: {self._fmt_count(r.get("pages", ""))}', f'ПЕЧАТНИ КОЛИ: {self._fmt_count(cols)}'), border(),
-                    row(f'СМЯНА НА ЦВЯТ: {change_text}', f'размножения: {self._fmt_count(reps)}'), border(),
-                    row(f'ОБРЪЩАНЕ: {turnover.upper()}', f'{self._fmt_count(waste)} листа (вкл. макулатура)'), border(),
-                    full('ДОВЪРШИТЕЛНИ РАБОТИ', True),
-                    *[f'| {line} |' for line in full_wrapped(f'{finish_line}')]
+                lines = [
+                    cborder(),
+                    cfull(f'ЗАЯВКА - {item or "Календари"}', True),
+                    cborder(),
+                    crow(f'КЛИЕНТ: {client or "—"}', f'ДАТА: {date or "—"}'),
+                    *cfull_wrapped(f'ОБРЯЗАН РАЗМЕР: {r.get("trim_size", "—")}'),
+                    *cfull_wrapped(f'ЕД. БРОЙКИ: {self._fmt_count(qty)} бр.'),
+                    crow(f'бр. страници: {self._fmt_count(r.get("pages", ""))}', f'ПЕЧАТНИ КОЛИ: {self._fmt_count(cols)}'),
+                    crow(f'ЦВЕТНОСТ: {color}', f'РАЗМНОЖЕНИЯ: {self._fmt_count(reps)}'),
+                    crow(f'СМЯНА НА ЦВЯТ: {change_text}', f'ОБРЪЩАНЕ: {turnover.upper()}'),
+                    crow(f'ХАРТИЯ ЦЕНА: {paper_price_text}', paper_manual),
+                    crow(f'ФОРМАТ: {r.get("source_format", "—")}', f'ПЕЧАТ: {r.get("print_format", "—")}'),
+                    *cfull_wrapped(f'{self._fmt_count(waste)} листа (вкл. макулатура)'),
+                    cborder(),
+                    cfull('ДОВЪРШИТЕЛНИ РАБОТИ:'),
+                    *cfull_wrapped(finish_line),
+                    cborder(),
+                    crow(f'ЦЕНА БЕЗ ДДС: {total:.2f} €', f'ЕД. БРОЙКА: {unit:.4f} €'),
+                    cborder(),
                 ]
             elif is_h:
                 r = self.himiya_result
