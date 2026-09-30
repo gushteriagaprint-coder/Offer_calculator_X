@@ -4382,7 +4382,7 @@ class App(tk.Tk):
 
                 lines = [
                     cborder(),
-                    cfull('ЗАЯВКА - рецепти', True),
+                    cfull(f'ЗАЯВКА - {item or "—"}', True),
                     cborder(),
                     crow(f'КЛИЕНТ: {client or "—"}', f'ДАТА: {date or "—"}'),
                     *cfull_wrapped(f'ОБРЯЗАН РАЗМЕР: {size}'),
