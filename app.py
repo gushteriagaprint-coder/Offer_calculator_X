@@ -4008,7 +4008,7 @@ class App(tk.Tk):
             is_book = bool(getattr(self, 'book_result', None)) and getattr(self, 'active_tab_name', '') == 'Книжки'
             is_spiral = bool(getattr(self, 'spiral_result', None)) and getattr(self, 'active_tab_name', '') == 'Спирали'
             is_calendar = bool(getattr(self, 'calendar_result', None)) and getattr(self, 'active_tab_name', '') == 'Календари'
-            is_h = (not is_book and not is_spiral) and getattr(self, 'last_result_mode', 'order') == 'himiya' and bool(self.himiya_result)
+            is_h = (getattr(self, 'active_tab_name', '') == 'Кочани' and getattr(self, 'last_result_mode', 'order') == 'himiya' and bool(self.himiya_result))
             if is_book:
                 r = self.book_result
             elif is_spiral:
