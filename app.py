@@ -4207,9 +4207,7 @@ class App(tk.Tk):
                 pages = r.get('pages', bv('pages')) or '—'
                 reps = r.get('repetitions', '') or '—'
                 clean = r.get('clean', '') or '—'
-                waste = r.get('waste', '') or '—'
                 whole = r.get('whole_sheets', '') or '—'
-                source_sheets = r.get('source_sheets', '') or '—'
                 paper_price = float(r.get('paper_price', 0) or 0)
                 if not paper_price:
                     try: paper_price = float(bv('paper').replace(',', '.')) if bv('paper') else 0.0
@@ -4235,19 +4233,59 @@ class App(tk.Tk):
                 finish = [x for x in finish if x not in ('Корица','Ел. монтаж','Предпечат','Пътни разходи','Транспорт','Оскъпяване')]
                 finish_line = ' ● '.join(finish) if finish else '—'
 
-                lines += [
-                    row(f'КЛИЕНТ: {client or "—"}', f'ДАТА: {date or "—"}'), border(),
-                    row(f'ИЗДЕЛИЕ: {item or "—"}', f'ЦЕНА БЕЗ ДДС: {float(r.get("total",0) or 0):.2f}'), border(),
-                    row(f'ЕД. БРОЙКИ: {qty} бр.', f'ед. бройка: {float(r.get("unit",0) or 0):.4f}'), border(),
-                    row(f'СТРАНИЦИ: {pages}', f'размножения: {reps}'), border(),
-                    row(f'ХАРТИЯ: {paper_price_text}', f'формат (на х-я): {r.get("source", bv("source")) or "—"}'), border(),
-                    row(paper_manual, f'формат за ПЕЧАТ: {r.get("print_format", "—")}'), border(),
-                    row(f'ПЕЧАТНИ КОЛИ: {r.get("cols", "—")}', f'ТИРАЖ: {clean}'), border(),
-                    row(f'ТИРАЖ: {clean}', f'{whole} листа (вкл. макулатура)'), border(), 
-                    row(f'ЦВЕТНОСТ: {color}', f'ОБРЪЩАНЕ: {turnover.upper() if turnover else "—"}'), border(),
-                    row(f'ОБРЯЗАН РАЗМЕР: {size}', ''), border(),
-                    full('ДОВЪРШИТЕЛНИ РАБОТИ', True),
-                    *[f'| {line} |' for line in full_wrapped(f'{finish_line}')]
+                # Компактен TXT/печатен шаблон за „Книжки“.
+                INNER_W = 53
+                COL_W = 25
+
+                def cfit(value, width, align='left'):
+                    text = str(value if value is not None else '')
+                    text = text.replace('\\t', ' ').replace('\\r', ' ').replace('\\n', ' ')
+                    if len(text) > width:
+                        text = text[:max(0, width - 1)] + '…'
+                    if align == 'right':
+                        return text.rjust(width)
+                    if align == 'center':
+                        return text.center(width)
+                    return text.ljust(width)
+
+                def cborder():
+                    return '+' + '-' * INNER_W + '+'
+
+                def crow(left='', right=''):
+                    return '| ' + cfit(left, COL_W) + ' | ' + cfit(right, COL_W) + ' |'
+
+                def cfull(text='', center=False):
+                    return '| ' + cfit(text, INNER_W, 'center' if center else 'left') + ' |'
+
+                def cfull_wrapped(text=''):
+                    raw = str(text if text is not None else '')
+                    raw = raw.replace('\\t', ' ').replace('\\r', ' ').replace('\\n', ' ')
+                    import textwrap
+                    chunks = textwrap.wrap(
+                        raw, width=INNER_W, break_long_words=False,
+                        break_on_hyphens=False, replace_whitespace=True
+                    ) or ['']
+                    return [cfull(chunk) for chunk in chunks]
+
+                lines = [
+                    cborder(),
+                    cfull(f'ЗАЯВКА - {item or "—"}', True),
+                    cborder(),
+                    crow(f'КЛИЕНТ: {client or "—"}', f'ДАТА: {date or "—"}'),
+                    *cfull_wrapped(f'ОБРЯЗАН РАЗМЕР: {size}'),
+                    *cfull_wrapped(f'ЕД. БРОЙКИ: {qty} бр.'),
+                    crow(f'СТРАНИЦИ: {pages}', f'ПЕЧАТНИ КОЛИ: {r.get("cols", "—")}'),
+                    crow(f'ЦВЕТНОСТ: {color}', f'ОБРЪЩАНЕ: {turnover.upper() if turnover else "—"}'),
+                    crow(f'ХАРТИЯ: {paper_price_text}', paper_manual),
+                    crow(f'ФОРМАТ: {r.get("source", bv("source")) or "—"}', f'ПЕЧАТ: {r.get("print_format", "—")}'),
+                    crow(f'ТИРАЖ: {clean}', f'РАЗМНОЖЕНИЯ: {reps}'),
+                    *cfull_wrapped(f'{whole} листа (вкл. макулатура)'),
+                    cborder(),
+                    cfull('ДОВЪРШИТЕЛНИ РАБОТИ:'),
+                    *cfull_wrapped(finish_line),
+                    cborder(),
+                    crow(f'ЦЕНА БЕЗ ДДС: {float(r.get("total",0) or 0):.2f} €', f'ЕД. БРОЙКА: {float(r.get("unit",0) or 0):.4f} €'),
+                    cborder(),
                 ]
             elif is_calendar:
                 r = self.calendar_result
