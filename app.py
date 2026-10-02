@@ -3731,9 +3731,23 @@ class App(tk.Tk):
             finish_zone.grid_columnconfigure(0, weight=1)
             finish_card, finish_content = self._request_card(finish_zone, 'Довършителни работи', 0, 0, 1)
             finish_content.columnconfigure(0, weight=1)
-            tk.Label(finish_content, text=finish_text, bg='#FFFFFF', fg='#344054',
-                     font=('Segoe UI',10), justify='left', anchor='nw', wraplength=300).pack(
-                         fill='both', expand=True, padx=5, pady=4)
+            finish_content.rowconfigure(0, weight=1)
+
+            # Показваме целия списък с превъртане, за да не се отрязват
+            # последните операции при много довършителни работи.
+            finish_textbox = tk.Text(
+                finish_content, bg='#FFFFFF', fg='#344054',
+                font=('Segoe UI', 10), relief='flat', bd=0,
+                wrap='word', height=4
+            )
+            finish_textbox.insert('1.0', finish_text)
+            finish_textbox.configure(state='disabled')
+            finish_textbox.grid(row=0, column=0, sticky='nsew', padx=5, pady=4)
+
+            finish_scroll = ttk.Scrollbar(finish_content, orient='vertical',
+                                          command=finish_textbox.yview)
+            finish_scroll.grid(row=0, column=1, sticky='ns', pady=4)
+            finish_textbox.configure(yscrollcommand=finish_scroll.set)
 
             _, extra = self._request_card(finish_zone, 'Допълнителни разходи', 0, 1, 1)
             extra.columnconfigure(0, weight=1)
