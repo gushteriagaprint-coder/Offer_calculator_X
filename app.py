@@ -3660,12 +3660,22 @@ class App(tk.Tk):
             _, prod = self._request_card(sheet, 'Производствени параметри', 0, 1, 1)
             self._request_production_display(prod, active, r)
 
-            _, finish_card = self._request_card(sheet, 'Довършителни работи', 1, 1, 1)
+            _, mat = self._request_card(sheet, 'Материали', 1, 1, 1)
+            book_plate_total = float(r.get('plates', 0) or 0)
+            book_material_rows = [
+                ('ХАРТИЯ', f'{paper_price:.3f} € цена/лист' if paper_price else ''),
+                ('ПЛАКИ', f'{book_plate_total:.2f} €'),
+            ]
+            for i, (lab, val) in enumerate(book_material_rows):
+                if str(val).strip() and str(val).strip() != '—':
+                    self._request_field(mat, lab, val, i, 0, value_bold=(i == 0))
+
+            _, finish_card = self._request_card(sheet, 'Довършителни работи', 2, 1, 1)
             tk.Label(finish_card, text=finish_text, bg='#FFFFFF', fg='#344054',
                      font=('Segoe UI',10), justify='left', anchor='w', wraplength=300).pack(
                          fill='x', padx=5, pady=4)
 
-            _, res = self._request_card(sheet, 'Резултати', 2, 1, 1)
+            _, res = self._request_card(sheet, 'Резултати', 3, 1, 1)
             res.columnconfigure(0, weight=1)
             self._request_result_stats(res, r, active)
             return
@@ -3705,7 +3715,7 @@ class App(tk.Tk):
             mat.columnconfigure(0, weight=1)
             material_rows = [
                 ('ХАРТИЯ', f'{paper_price:.3f} € цена/лист' if paper_price else ''),
-                ('ХАРТИЯ', paper_manual),
+                ('ПЛАКИ', f'{float(r.get("plates", 0) or 0):.2f} €'),
             ]
             for i, (lab, val) in enumerate(material_rows):
                 if str(val).strip() and str(val).strip() not in ('0', '0.000', '—'):
@@ -3818,7 +3828,7 @@ class App(tk.Tk):
             prod.columnconfigure(1, weight=1)
 
             _, mat = self._request_card(sheet, 'Материали', 1, 1, 1)
-            material_rows=[('ХАРТИЯ ЦЕНА',paper_price_text),('ХАРТИЯ',paper_manual)]
+            material_rows=[('ХАРТИЯ',paper_price_text),('ПЛАКИ',f'{float(r.get("plates",0) or 0):.2f} €')]
             for i,(lab,val) in enumerate(material_rows):
                 if str(val).strip() and str(val).strip()!='—':
                     self._request_field(mat, lab, val, i, 0, value_bold=(i==0))
