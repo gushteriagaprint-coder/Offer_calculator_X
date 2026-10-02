@@ -3671,9 +3671,11 @@ class App(tk.Tk):
                     self._request_field(mat, lab, val, i, 0, value_bold=(i == 0))
 
             _, finish_card = self._request_card(sheet, 'Довършителни работи', 2, 1, 1)
+            finish_card.grid_rowconfigure(0, weight=1)
+            finish_card.grid_columnconfigure(0, weight=1)
             tk.Label(finish_card, text=finish_text, bg='#FFFFFF', fg='#344054',
-                     font=('Segoe UI',10), justify='left', anchor='w', wraplength=300).pack(
-                         fill='x', padx=5, pady=4)
+                     font=('Segoe UI',10), justify='left', anchor='nw',
+                     wraplength=300).pack(fill='both', expand=True, padx=5, pady=4)
 
             _, res = self._request_card(sheet, 'Резултати', 3, 1, 1)
             res.columnconfigure(0, weight=1)
@@ -3828,7 +3830,13 @@ class App(tk.Tk):
             prod.columnconfigure(1, weight=1)
 
             _, mat = self._request_card(sheet, 'Материали', 1, 1, 1)
-            material_rows=[('ХАРТИЯ',paper_price_text),('ПЛАКИ',f'{float(r.get("plates",0) or 0):.2f} €')]
+            plate_price = float(r.get('plate_price', 0) or 0)
+            if not plate_price:
+                try:
+                    plate_price = float(cv('plate_price').replace(',', '.')) if cv('plate_price') else 0.0
+                except Exception:
+                    plate_price = 0.0
+            material_rows=[('ХАРТИЯ',paper_price_text),('ПЛАКИ',f'{plate_price:.2f} €')]
             for i,(lab,val) in enumerate(material_rows):
                 if str(val).strip() and str(val).strip()!='—':
                     self._request_field(mat, lab, val, i, 0, value_bold=(i==0))
