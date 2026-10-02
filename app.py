@@ -4548,7 +4548,7 @@ class App(tk.Tk):
                 title='Запази заявката като текстов файл',
                 defaultextension='.txt',
                 filetypes=[('Текстов файл', '*.txt'), ('Всички файлове', '*.*')],
-                initialfile=f'Заявка_{self.request_vars["client"].get().strip() or ""}.txt'
+                initialfile=f'Заявка_{self.request_vars["client"].get().strip() or ""}_{self.request_vars["item"].get().strip() or ""}.txt'
             )
             if not path:
                 return
