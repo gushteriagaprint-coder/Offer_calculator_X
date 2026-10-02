@@ -2807,6 +2807,7 @@ class App(tk.Tk):
                 # Допълнителни полета само за представянето в „Заявка“ — не участват
                 # в изчисленията и запазват вече изчислените стойности.
                 'cols':cols,'waste':waste,'whole_sheets':whole,'paper_price':paper_price,
+                'plate_unit_price': (plates / plate_count) if plate_count else 0.0,
                 'color_change_count':num('color_change_count'),'paper_g':self.request_vars['paper'].get().strip(),
                 'separator_material':sep_mat,'separator_sheets':sep_sheets,
                 'finish_costs': {'3 стр. обрязване/рязане':cut,'Шиене':sewing,'Биговане':big,'Набор':typeset,'Пакетиране':packaging,'Лепене':glue,'Разрязване':cut2,'Леп. гръб':spine,'Прозорци':windows}}
@@ -3614,6 +3615,13 @@ class App(tk.Tk):
         sheet.rowconfigure(2, weight=0)
         sheet.rowconfigure(3, weight=1)
 
+        # „Кочани“ използва височината на редовете за карето
+        # „Довършителни работи“, за да се виждат всички операции.
+        if active == 'Кочани':
+            sheet.rowconfigure(1, weight=1)
+            sheet.rowconfigure(2, weight=1)
+            sheet.rowconfigure(3, weight=0)
+
         # Общата горна секция — ръчно въвеждаемите данни остават същите.
         _, details = self._request_card(sheet, 'Данни за заявката', 0, 0, 4)
         for c in range(4):
@@ -3844,12 +3852,7 @@ class App(tk.Tk):
             prod.columnconfigure(1, weight=1)
 
             _, mat = self._request_card(sheet, 'Материали', 1, 1, 1)
-            plate_price = float(r.get('plate_price', 0) or 0)
-            if not plate_price:
-                try:
-                    plate_price = float(cv('plate_price').replace(',', '.')) if cv('plate_price') else 0.0
-                except Exception:
-                    plate_price = 0.0
+            plate_price = float(r.get('plate_unit_price', 0) or 0)
             material_rows=[('ХАРТИЯ',paper_price_text),('ПЛАКИ',f'{plate_price:.2f} €')]
             for i,(lab,val) in enumerate(material_rows):
                 if str(val).strip() and str(val).strip()!='—':
