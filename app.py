@@ -3676,7 +3676,7 @@ class App(tk.Tk):
             ]
             for i, (lab, val) in enumerate(book_material_rows):
                 if str(val).strip() and str(val).strip() != '—':
-                    self._request_field(mat, lab, val, i, 0, value_bold=(i == 0))
+                    self._request_field(mat, lab, val, i, 0, value_bold=True)
 
             _, finish_card = self._request_card(sheet, 'Довършителни работи', 2, 1, 1)
             finish_card.grid_rowconfigure(0, weight=1)
@@ -3729,7 +3729,7 @@ class App(tk.Tk):
             ]
             for i, (lab, val) in enumerate(material_rows):
                 if str(val).strip() and str(val).strip() not in ('0', '0.000', '—'):
-                    self._request_field(mat, lab, val, i, 0, value_bold=(i == 0))
+                    self._request_field(mat, lab, val, i, 0, value_bold=True)
 
             # Довършителни + допълнителни разходи използват една обща колона.
             finish_zone = tk.Frame(sheet, bg='#F7F9FC', bd=0, highlightthickness=0)
@@ -3899,7 +3899,7 @@ class App(tk.Tk):
             material_rows=[('ХАРТИЯ',paper_total),('ПЛАКИ',euro('plates'))]
             material_rows=[(lab,val) for lab,val in material_rows if abs(val) > 1e-12]
             for i,(lab,val) in enumerate(material_rows):
-                self._request_field(mat, lab, f'{val:.2f} €', i, 0, value_bold=(lab=='ХАРТИЯ'))
+                self._request_field(mat, lab, f'{val:.2f} €', i, 0, value_bold=True)
 
             finish_text=v['finish'] or '—'
 
