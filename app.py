@@ -3856,7 +3856,7 @@ class App(tk.Tk):
             material_rows=[('ХАРТИЯ',paper_price_text),('ПЛАКИ',f'{plate_price:.2f} €')]
             for i,(lab,val) in enumerate(material_rows):
                 if str(val).strip() and str(val).strip()!='—':
-                    self._request_field(mat, lab, val, i, 0, value_bold=(i==0))
+                    self._request_field(mat, lab, val, i, 0, value_bold=True)
 
             _, finish_card = self._request_card(sheet, 'Довършителни работи', 2, 1, 1)
             tk.Label(finish_card, text=finish_text, bg='#FFFFFF', fg='#344054',
